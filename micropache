@@ -1,0 +1,83 @@
+#!/bin/sh
+
+# Starts an Apache server in the current directory.
+# Built to quickly run PHP sites on a Mac, using the system Apache binary.
+
+dir=$(pwd)
+
+cat <<EOF > /tmp/micropache-httpd.conf
+# Generated automatically by micropache.
+
+LoadModule authn_file_module libexec/apache2/mod_authn_file.so
+LoadModule authn_core_module libexec/apache2/mod_authn_core.so
+LoadModule authz_host_module libexec/apache2/mod_authz_host.so
+LoadModule authz_groupfile_module libexec/apache2/mod_authz_groupfile.so
+LoadModule authz_user_module libexec/apache2/mod_authz_user.so
+LoadModule authz_core_module libexec/apache2/mod_authz_core.so
+LoadModule access_compat_module libexec/apache2/mod_access_compat.so
+LoadModule auth_basic_module libexec/apache2/mod_auth_basic.so
+LoadModule reqtimeout_module libexec/apache2/mod_reqtimeout.so
+LoadModule filter_module libexec/apache2/mod_filter.so
+LoadModule deflate_module libexec/apache2/mod_deflate.so
+LoadModule mime_module libexec/apache2/mod_mime.so
+LoadModule log_config_module libexec/apache2/mod_log_config.so
+LoadModule env_module libexec/apache2/mod_env.so
+LoadModule headers_module libexec/apache2/mod_headers.so
+LoadModule setenvif_module libexec/apache2/mod_setenvif.so
+LoadModule version_module libexec/apache2/mod_version.so
+LoadModule proxy_module libexec/apache2/mod_proxy.so
+LoadModule proxy_connect_module libexec/apache2/mod_proxy_connect.so
+LoadModule proxy_ftp_module libexec/apache2/mod_proxy_ftp.so
+LoadModule proxy_http_module libexec/apache2/mod_proxy_http.so
+LoadModule proxy_fcgi_module libexec/apache2/mod_proxy_fcgi.so
+LoadModule proxy_scgi_module libexec/apache2/mod_proxy_scgi.so
+LoadModule proxy_wstunnel_module libexec/apache2/mod_proxy_wstunnel.so
+LoadModule proxy_ajp_module libexec/apache2/mod_proxy_ajp.so
+LoadModule proxy_balancer_module libexec/apache2/mod_proxy_balancer.so
+LoadModule proxy_express_module libexec/apache2/mod_proxy_express.so
+LoadModule slotmem_shm_module libexec/apache2/mod_slotmem_shm.so
+LoadModule lbmethod_byrequests_module libexec/apache2/mod_lbmethod_byrequests.so
+LoadModule lbmethod_bytraffic_module libexec/apache2/mod_lbmethod_bytraffic.so
+LoadModule lbmethod_bybusyness_module libexec/apache2/mod_lbmethod_bybusyness.so
+LoadModule unixd_module libexec/apache2/mod_unixd.so
+LoadModule status_module libexec/apache2/mod_status.so
+LoadModule autoindex_module libexec/apache2/mod_autoindex.so
+LoadModule cgi_module libexec/apache2/mod_cgi.so
+LoadModule vhost_alias_module libexec/apache2/mod_vhost_alias.so
+LoadModule negotiation_module libexec/apache2/mod_negotiation.so
+LoadModule dir_module libexec/apache2/mod_dir.so
+LoadModule alias_module libexec/apache2/mod_alias.so
+LoadModule rewrite_module libexec/apache2/mod_rewrite.so
+LoadModule php5_module libexec/apache2/libphp5.so
+
+AddHandler php5-script .php
+
+<IfModule unixd_module>
+  User _www
+  Group _www
+</IfModule>
+
+<Directory "$dir">
+  Options FollowSymLinks Indexes
+  AllowOverride All
+  Require all granted
+</Directory>
+
+<IfModule dir_module>
+  DirectoryIndex index.html index.php
+</IfModule>
+
+EOF
+
+# http://httpd.apache.org/docs/2.4/programs/httpd.html
+
+sudo httpd -k start \
+  -c "DocumentRoot $dir" \
+  -f "/tmp/micropache-httpd.conf" \
+  -c "Listen 8000" \
+  -c "AccessFileName .htaccess" \
+  -c "ErrorLog /dev/stdout" \
+  -c "CustomLog /dev/stdout '%h %l %u %t %r %>s %b'" \
+  -c "ServerName localhost" \
+  -e info \
+  -D FOREGROUND
