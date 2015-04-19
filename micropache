@@ -74,7 +74,7 @@ EOF
 sudo httpd -k start \
   -c "DocumentRoot $dir" \
   -f "/tmp/micropache-httpd.conf" \
-  -c "Listen 8000" \
+  -c "Listen 80" \
   -c "AccessFileName .htaccess" \
   -c "ErrorLog /dev/stdout" \
   -c "CustomLog /dev/stdout '%h %l %u %t %r %>s %b'" \
