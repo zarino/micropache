@@ -3,9 +3,10 @@
 # Starts an Apache server in the current directory.
 # Built to quickly run PHP sites on a Mac, using the system Apache binary.
 
+TEMPDIR=`mktemp -d -t 'micropache'`
 dir=$(pwd)
 
-cat <<EOF > /tmp/micropache-httpd.conf
+cat <<EOF > "$TEMPDIR/micropache-httpd.conf"
 # Generated automatically by micropache.
 
 LoadModule authn_file_module libexec/apache2/mod_authn_file.so
@@ -71,10 +72,12 @@ EOF
 
 # http://httpd.apache.org/docs/2.4/programs/httpd.html
 
-sudo httpd -k start \
+httpd -k start \
   -c "DocumentRoot $dir" \
-  -f "/tmp/micropache-httpd.conf" \
-  -c "Listen 80" \
+  -f "$TEMPDIR/micropache-httpd.conf" \
+  -c "LockFile $TEMPDIR/accept.lock" \
+  -c "PidFile $TEMPDIR/httpd.pid" \
+  -c "Listen 8000" \
   -c "AccessFileName .htaccess" \
   -c "ErrorLog /dev/stdout" \
   -c "CustomLog /dev/stdout '%h %l %u %t %r %>s %b'" \
