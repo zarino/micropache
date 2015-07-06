@@ -78,14 +78,19 @@ EOF
 
 OSX_VERSION=`sw_vers -productVersion | cut -d . -f 2`
 FLAG=""
+MUTEX=""
 if [ $OSX_VERSION = 9 ]; then
     FLAG='-D Mavericks'
+    MUTEX="-c LockFile $TEMPDIR/accept.lock"
+elif [ $OSX_VERSION = 10 ]; then
+    FLAG='-D Yosemite'
+    MUTEX="-c Mutex file:$TEMPDIR default"
 fi
 
 httpd -k start \
   -c "DocumentRoot $dir" \
   -f "$TEMPDIR/micropache-httpd.conf" \
-  -c "LockFile $TEMPDIR/accept.lock" \
+  "$MUTEX" \
   -c "PidFile $TEMPDIR/httpd.pid" \
   -c "Listen 8000" \
   -c "AccessFileName .htaccess" \
