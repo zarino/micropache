@@ -1,6 +1,6 @@
 # micropache
 
-Starts an Apache webserver in the current directory, accessible at http://localhost on port 80.
+Starts an Apache webserver in the current directory, accessible at http://localhost on port 8000.
 
 Built to quickly run PHP sites on a Mac, using the system Apache binary, but without messing with virtualhosts and the default system config files.
 
@@ -16,6 +16,6 @@ Built to quickly run PHP sites on a Mac, using the system Apache binary, but wit
     cd ~/some/web/directory
     micropache
 
-Micropache will ask for your root password, since the Mac’s built-in `httpd` daemon must run as root.
+The contents of `~/some/web/directory` will now be available at <http://localhost:8000>.
 
 Server logs will be output to the console. Press `Ctrl-C` to stop the server.
