@@ -87,17 +87,24 @@ elif [ $OSX_VERSION = 10 ]; then
     MUTEX="-c Mutex file:$TEMPDIR default"
 fi
 
-while :; do
-    for (( PORT=8000 ; PORT < 9000 ; PORT++ )); do
-        nc -z localhost "$PORT" >/dev/null || break 2
+echo $1;
+
+if [ "$1" == "--port80" ]; then
+    PORT=80
+    SUDO="sudo"
+else
+    while :; do
+        for (( PORT=8000 ; PORT < 9000 ; PORT++ )); do
+            nc -z localhost "$PORT" >/dev/null || break 2
+        done
+        echo "No free local ports available"
+        exit 2;
     done
-   echo "No free local ports available"
-   exit 2;
-done
+fi
 
 echo "Listening on port [31m$PORT[m"
 
-httpd -k start \
+$SUDO httpd -k start \
   -c "DocumentRoot $dir" \
   -f "$TEMPDIR/micropache-httpd.conf" \
   "$MUTEX" \

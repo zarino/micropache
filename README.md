@@ -20,4 +20,8 @@ Built to quickly run PHP sites on a Mac, using the system Apache binary, but wit
 The contents of `~/some/web/directory` will now be available at
 <http://localhost:8000> (or the first available port above that).
 
+If you need to run on port 80 (eg: for hassle-free WordPress hosting)
+pass the `--port80` command line argument. The `httpd` process will be
+run with `sudo`. You will be asked for an administrator password.
+
 Server logs will be output to the console. Press `Ctrl-C` to stop the server.
