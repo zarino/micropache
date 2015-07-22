@@ -87,8 +87,6 @@ elif [ $OSX_VERSION = 10 ]; then
     MUTEX="-c Mutex file:$TEMPDIR default"
 fi
 
-echo $1;
-
 if [ "$1" == "--port80" ]; then
     PORT=80
     SUDO="sudo"
