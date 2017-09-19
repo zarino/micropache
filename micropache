@@ -87,10 +87,36 @@ elif [ $OSX_VERSION = 10 ]; then
     MUTEX="-c Mutex file:$TEMPDIR default"
 fi
 
-if [ "$1" == "--port80" ]; then
-    PORT=80
-    SUDO="sudo"
-else
+use_port()
+{
+    PORT="$1"
+    if [ "$1" -lt "1024" ]; then
+        SUDO="sudo"
+    fi
+}
+
+# Parse command line arguments.
+while test $# -gt 0
+do
+    case "$1" in
+        --port)
+            use_port $2
+            shift
+            ;;
+        --port80)
+            use_port 80
+            ;;
+        --*) echo "unknown option $1"
+            ;;
+        *) echo "unknown argument $1"
+            ;;
+    esac
+    shift
+done
+
+
+# If user hasn't requested a specific port, find a free one.
+if [ -z $PORT ]; then
     while :; do
         for (( PORT=8000 ; PORT < 9000 ; PORT++ )); do
             nc -z localhost "$PORT" >/dev/null || break 2
