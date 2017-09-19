@@ -3,9 +3,84 @@
 # Starts an Apache server in the current directory.
 # Built to quickly run PHP sites on a Mac, using the system Apache binary.
 
+# http://httpd.apache.org/docs/2.4/programs/httpd.html
+
 TEMPDIR=`mktemp -d -t 'micropache'`
 dir=$(pwd)
+OSX_VERSION=`sw_vers -productVersion | cut -d . -f 2`
+FLAG=""
+MUTEX=""
+APACHE_USER="_www"
+APACHE_GROUP="_www"
 
+use_port()
+{
+    PORT="$1"
+    if [ "$1" -lt "1024" ]; then
+        SUDO="sudo"
+    fi
+}
+
+# Apache config differs based on OS X version
+if [ $OSX_VERSION = 9 ]; then
+    FLAG='-D Mavericks'
+    MUTEX="-c LockFile $TEMPDIR/accept.lock"
+elif [ $OSX_VERSION = 10 ]; then
+    FLAG='-D Yosemite'
+    MUTEX="-c Mutex file:$TEMPDIR default"
+fi
+
+# Parse command line arguments.
+while test $# -gt 0
+do
+    case "$1" in
+        --port)
+            use_port $2
+            shift
+            ;;
+        --port80)
+            use_port 80
+            ;;
+        --user)
+            APACHE_USER=$2
+            shift
+            ;;
+        --group)
+            APACHE_GROUP=$2
+            shift
+            ;;
+        --uid)
+            APACHE_USER=$(id -u -n $2)
+            shift
+            ;;
+        --gid)
+            APACHE_GROUP=$(id -g -n $2)
+            shift
+            ;;
+        --as-me)
+            APACHE_USER=$(id -u -n)
+            APACHE_GROUP=$(id -g -n)
+            ;;
+        --*) echo "unknown option $1"
+            ;;
+        *) echo "unknown argument $1"
+            ;;
+    esac
+    shift
+done
+
+# If user hasn't requested a specific port, find a free one.
+if [ -z $PORT ]; then
+    while :; do
+        for (( PORT=8000 ; PORT < 9000 ; PORT++ )); do
+            nc -z localhost "$PORT" >/dev/null || break 2
+        done
+        echo "No free local ports available"
+        exit 2;
+    done
+fi
+
+# Write out the Apache config file.
 cat <<EOF > "$TEMPDIR/micropache-httpd.conf"
 # Generated automatically by micropache.
 
@@ -56,8 +131,8 @@ LoadModule php5_module libexec/apache2/libphp5.so
 AddHandler php5-script .php
 
 <IfModule unixd_module>
-  User _www
-  Group _www
+  User $APACHE_USER
+  Group $APACHE_GROUP
 </IfModule>
 
 <Directory "$dir">
@@ -73,58 +148,6 @@ AddHandler php5-script .php
 </IfModule>
 
 EOF
-
-# http://httpd.apache.org/docs/2.4/programs/httpd.html
-
-OSX_VERSION=`sw_vers -productVersion | cut -d . -f 2`
-FLAG=""
-MUTEX=""
-if [ $OSX_VERSION = 9 ]; then
-    FLAG='-D Mavericks'
-    MUTEX="-c LockFile $TEMPDIR/accept.lock"
-elif [ $OSX_VERSION = 10 ]; then
-    FLAG='-D Yosemite'
-    MUTEX="-c Mutex file:$TEMPDIR default"
-fi
-
-use_port()
-{
-    PORT="$1"
-    if [ "$1" -lt "1024" ]; then
-        SUDO="sudo"
-    fi
-}
-
-# Parse command line arguments.
-while test $# -gt 0
-do
-    case "$1" in
-        --port)
-            use_port $2
-            shift
-            ;;
-        --port80)
-            use_port 80
-            ;;
-        --*) echo "unknown option $1"
-            ;;
-        *) echo "unknown argument $1"
-            ;;
-    esac
-    shift
-done
-
-
-# If user hasn't requested a specific port, find a free one.
-if [ -z $PORT ]; then
-    while :; do
-        for (( PORT=8000 ; PORT < 9000 ; PORT++ )); do
-            nc -z localhost "$PORT" >/dev/null || break 2
-        done
-        echo "No free local ports available"
-        exit 2;
-    done
-fi
 
 echo "Listening on port [31m$PORT[m"
 
