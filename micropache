@@ -21,6 +21,34 @@ use_port()
     fi
 }
 
+print_help()
+{
+    cat <<EOF
+usage: micropache [--port <num>] [--user <name>] [--group <name>] [--uid <id>]
+                  [--gid <id>] [--as-me]
+
+  --port <num>    Run the Apache server on the given port. Requesting a port
+                  below 1024 will run the httpd process under sudo, requiring
+                  an administrator password. If you do not specify a port, a
+                  free one will be chosen automatically, starting at 8000.
+  --user <name>   Run httpd as the given filesystem user. Defaults to "_www".
+  --group <name>  Run httpd as the given filesystem group. Defaults to "_www".
+  --uid <id>      Like --user, except you provide a UID rather than a name.
+  --gid <id>      Like --group, except you provide a GID rather than a name.
+  --as-me         Run httpd as your current user, with your username and group.
+
+Example usage:
+
+  micropache
+  micropache --port 80
+  micropache --port 4000
+  micropache --user www-data --group www-data
+  micropache --uid 520 --gid 20
+  micropache --as-me
+
+EOF
+}
+
 # Apache config differs based on OS X version
 if [ $OSX_VERSION = 9 ]; then
     FLAG='-D Mavericks'
@@ -60,6 +88,14 @@ do
         --as-me)
             APACHE_USER=$(id -u -n)
             APACHE_GROUP=$(id -g -n)
+            ;;
+        --help)
+            print_help
+            exit 0;
+            ;;
+        -h)
+            print_help
+            exit 0;
             ;;
         --*) echo "unknown option $1"
             ;;
