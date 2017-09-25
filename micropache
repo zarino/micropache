@@ -49,12 +49,13 @@ Example usage:
 EOF
 }
 
-# Apache config differs based on OS X version
-if [ $OSX_VERSION = 9 ]; then
+# Starting with 10.10 Yosemite, Apple upgraded the bundled Apache
+# from 2.2 to 2.4, requiring a slightly different config.
+if [ $OSX_VERSION -lt 10 ]; then
     FLAG='-D Mavericks'
     MUTEX="-c LockFile $TEMPDIR/accept.lock"
-elif [ $OSX_VERSION = 10 ]; then
-    FLAG='-D Yosemite'
+else
+    FLAG='-D YosemiteOrLater'
     MUTEX="-c Mutex file:$TEMPDIR default"
 fi
 
@@ -150,7 +151,7 @@ LoadModule dir_module libexec/apache2/mod_dir.so
 LoadModule alias_module libexec/apache2/mod_alias.so
 LoadModule rewrite_module libexec/apache2/mod_rewrite.so
 LoadModule php5_module libexec/apache2/libphp5.so
-<IfDefine !Mavericks>
+<IfDefine YosemiteOrLater>
     LoadModule authn_core_module libexec/apache2/mod_authn_core.so
     LoadModule authz_core_module libexec/apache2/mod_authz_core.so
     LoadModule access_compat_module libexec/apache2/mod_access_compat.so
@@ -174,7 +175,7 @@ AddHandler php5-script .php
 <Directory "$dir">
   Options FollowSymLinks Indexes
   AllowOverride All
-  <IfDefine !Mavericks>
+  <IfDefine YosemiteOrLater>
       Require all granted
   </IfDefine>
 </Directory>
