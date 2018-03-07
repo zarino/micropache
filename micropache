@@ -188,7 +188,7 @@ EOF
 
 echo "Listening on port [31m$PORT[m"
 
-$SUDO httpd -k start \
+$SUDO /usr/sbin/httpd -k start \
   -c "DocumentRoot $dir" \
   -f "$TEMPDIR/micropache-httpd.conf" \
   "$MUTEX" \
