@@ -286,21 +286,39 @@ def get_port(runtime_args):
     the end-user, or the first available port in the 8000-9000 range."""
 
     if runtime_args.port:
-        return runtime_args.port
+        if port_is_available(runtime_args.port):
+            return runtime_args.port
+        else:
+            print('Port {} is already in use'.format(runtime_args.port))
+            return sys.exit(3)
 
     else:
         for i in range(8000, 9000):
-            if not get_output('nc', '-z', 'localhost', i)[0]:
+            if port_is_available(i):
                 return i
 
         print('No free local ports available')
         return sys.exit(2)
 
 
+def port_is_available(port):
+    """Return True if netcat can find no daemons
+    listening on the given TCP port."""
+
+    return not produces_output('nc', '-z', 'localhost', port)
+
+
 def port_requires_sudo(port):
     """Return True if given number is under 1024."""
 
     return port < 1024
+
+
+def produces_output(*args):
+    """Return True if given shell command
+    outputs anything to stdout or stderr."""
+
+    return any(get_output(*args))
 
 
 def get_temp_dir():
