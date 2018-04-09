@@ -13,6 +13,11 @@ import sys
 import tempfile
 
 
+def apache_2_point_4_or_higher(apache_version):
+    """Return boolean of whether given version is 2.4 and higher."""
+    return (apache_version[0] > 2) or (apache_version[0] == 2 and apache_version[1] >= 4)
+
+
 def cleanup(signal, frame):
     """Delete the temp_dir directory, if we know about it and it exists."""
 
@@ -182,7 +187,7 @@ def get_apache_mutex_for_version(apache_version, temp_dir):
     """Return the correct Mutex/LockFile line
     for the given version of Apache."""
 
-    if apache_version[0] > 2 or apache_version[0] == 2 and apache_version[1] >= 4:
+    if apache_2_point_4_or_higher(apache_version):
         return 'Mutex file:{} default'.format(temp_dir)
     else:
         return 'LockFile {}/accept.lock'.format(temp_dir)
@@ -192,7 +197,7 @@ def get_apache_permissions_for_version(apache_version):
     """Return the correct permissions line
     for the given version of Apache."""
 
-    if apache_version[0] > 2 or apache_version[0] == 2 and apache_version[1] >= 4:
+    if apache_2_point_4_or_higher(apache_version):
         return 'Require all granted'
     else:
         return 'Order deny,allow\nAllow from all'
