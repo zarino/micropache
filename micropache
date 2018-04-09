@@ -301,6 +301,12 @@ def get_port(runtime_args):
         return sys.exit(2)
 
 
+def get_temp_dir():
+    """Return file descriptor for a temporary directory."""
+
+    return tempfile.mkdtemp(prefix='micropache_')
+
+
 def port_is_available(port):
     """Return True if netcat can find no daemons
     listening on the given TCP port."""
@@ -319,12 +325,6 @@ def produces_output(*args):
     outputs anything to stdout or stderr."""
 
     return any(get_output(*args))
-
-
-def get_temp_dir():
-    """Return file descriptor for a temporary directory."""
-
-    return tempfile.mkdtemp(prefix='micropache_')
 
 
 for sig in (signal.SIGABRT, signal.SIGINT, signal.SIGTERM):
