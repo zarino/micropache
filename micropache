@@ -361,8 +361,15 @@ process = subprocess.Popen(
 )
 
 while True:
-    line = process.stdout.readline()
-    if line != b'':
-        os.write(1, line)
-    else:
+    stdout_line = process.stdout.readline()
+    stderr_line = process.stderr.readline()
+
+    if stdout_line != b'':
+        os.write(1, stdout_line)
+
+    if stderr_line != b'':
+        # print(' '.join(httpd_command), file=sys.stderr)
+        os.write(2, stderr_line)
+
+    if stdout_line == b'' and stderr_line == b'':
         break
