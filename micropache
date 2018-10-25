@@ -62,7 +62,9 @@ def create_httpd_conf(temp_dir, default_config, apache_user,
     CustomLog /dev/stdout '%h %l %u %t %r %>s %b'
     PidFile "{pidfile}"
 
-    AddHandler php5-script .php
+    <FilesMatch \.php$>
+        SetHandler application/x-httpd-php
+    </FilesMatch>
 
     <IfModule unixd_module>
     User {user}
