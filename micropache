@@ -167,6 +167,8 @@ def extract_default_config(httpd_settings):
                 defaults['general'].append(line)
             elif line.startswith('<IfModule') or line.startswith('</IfModule'):
                 defaults['general'].append(line)
+            elif line.startswith('Include'):
+                defaults['general'].append(line)
 
     return defaults
 
