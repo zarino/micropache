@@ -366,7 +366,8 @@ print('Listening on port {}'.format(port))
 process = subprocess.Popen(
     map(str, httpd_command),
     stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE
+    stderr=subprocess.PIPE,
+    stdin=subprocess.PIPE
 )
 
 while True:
